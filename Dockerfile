@@ -5,6 +5,7 @@ RUN set -ex; \
 	fetchDeps=' \
 		ca-certificates \
 		curl \
+		gnupg \
 	'; \
 	apt-get update; \
 	apt-get install -y --no-install-recommends $fetchDeps; \
