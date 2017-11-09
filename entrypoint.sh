@@ -1,5 +1,14 @@
 #!/bin/bash
 
+quote() {
+  for arg
+  do
+    var=$(printf "%sx" "$arg" | sed -e "s/'/'\\\\''/")
+    var=${var%x}
+    printf "'%s' " "$var"
+  done
+}
+
 # Setup user/group ids
 if [ ! -z "${ONEDRIVE_UID}" ]; then
   if [ ! "$(id -u onedrive)" -eq "${ONEDRIVE_UID}" ]; then
@@ -30,4 +39,4 @@ if [ ! -z "${ONEDRIVE_GID}" ]; then
 fi
 
 # Start OndeDrive Free Client as designated user
-exec su - onedrive -c "$@"
+exec su - onedrive -c "$(quote "$@")"
