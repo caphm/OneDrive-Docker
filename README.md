@@ -1,7 +1,9 @@
 ## Introduction
 
 This is a docker container for syncing your OneDrive data, based on the
-[OneDrive Free Client](https://github.com/skilion/onedrive).
+[OneDrive Free Client](https://github.com/skilion/onedrive) and [OneDrive-Docker container by remyjette](https://github.com/remyjette/OneDrive-Docker).
+
+It supports running the OneDrive service as a specific user and more flexible configuration options.
 
 
 ## Setting up the application
@@ -12,21 +14,23 @@ service via OAuth, the first run must be an *interactive* run.
 #### Step 1
 
 ```shell
-docker pull remyjette/onedrive
+docker pull caphm/onedrive
 ```
 
 #### Step 2
 
 ```shell
-docker run -it --restart on-failure --name onedrive
+docker run -it
   -v /path/to/onedrive:/onedrive
-  remyjette/onedrive
+  -v /path/to/config:/config
+  caphm/onedrive
 ```
 
 *Note:*
 
 * Update `/path/to/onedrive` to your actual path where you would like to store your OneDrive files.
-* `--restart on-failure` is to cause the container to restart if the sync times out due to poor network connectivity.
+* Update `/path/to/config` to your actual path where the configuration files are stored.
+* By default, the onedrive service will run under `UID=1000` and `GID=1000`. See below for instructions on how to change this.
 
 #### Step 3
 
@@ -46,39 +50,22 @@ You can keep the docker container running in the foreground.
 
 You can hit `CTRL-C` to stop it and then restart the container.
 
-```shell
-docker start onedrive
-```
+## Configuration
 
-## Additional options
+All configuration options of the original OneDrive Free Client are available. Refer to [its configuration documentation](https://github.com/skilion/onedrive#configuration) for details. Configuration files should be put into the location mapped to `/config`.
 
-#### Skipping file patterns
+Beware of setting `sync_dir` to anything else than `/onedrive` without mapping the location to an appropriate path on the host. You should not need to specify a different value for `sync_dir` anyway, just change the host path mapped to `/onedrive` if you want to store your files in a different location.
 
-If you would like this container to skip any file patterns, set the
-`SKIP_FILES` environment variable. Patterns are case insensitive. `*` and `?`
-wildcards characters are supported. Use `|` to separate multiple patterns.
-By default, the pattern is `.*|~*`, skipping all files that begin with a
-`.` or `~`.
-
-#### Selective Sync
-
-To use Selective sync, create a file named `skip_file` and list the files
-and folders you want to sync. Each line of the file represents a path to a
-file or directory relative from the root of your OneDrive.
-
-Here is an example:
-```
-Backup
-Documents/latest_report.docx
-Work/ProjectX
-notes.txt
-```
-
-Once you have created your `skip_file`, mount it in your container as `/skip_file`:
+By default, the service inside the container runs under `UID=1000` and `GID=1000`. To sepcify a different UID or GID, pass them via the environment variables `ONEDRIVE_UID` and `ONEDRIVE_GID`:
 
 ```shell
-docker run -it --restart on-failure --name onedrive
+docker run -it
   -v /path/to/onedrive:/onedrive
-  -v /path/to/skip_file:/skip_file
-  remyjette/onedrive
+  -v /path/to/config:/config
+  -e ONEDRIVE_UID=<desired UID>
+  -e ONEDRIVE_GID=<desired GID>
+  caphm/onedrive
 ```
+
+**Make sure that the specified UID and/or GID have read and write permissions to the volumes mapped to `/onedrive` and `/config`**.
+The container will not change ownership or modify permissions itself. All files created will be owned by the specified UID and GID.
