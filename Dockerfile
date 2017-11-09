@@ -1,15 +1,22 @@
 FROM debian as builder
-WORKDIR /tmp
-RUN apt-get update \
-  && apt-get -y install libcurl4-openssl-dev libsqlite3-dev wget gcc unzip make git \
-  && git clone https://github.com/ncopa/su-exec && cd /tmp/su-exec && make \
-  && wget http://downloads.dlang.org/releases/2.x/2.075.1/dmd_2.075.1-0_amd64.deb -O dmd.deb && dpkg -i dmd.deb \
-  && git clone https://github.com/skilion/onedrive && cd /tmp/onedrive && make
+ARG DEBIAN_FRONTEND="noninteractive"
+ENV TERM="xterm" LANG="C.UTF-8" LC_ALL="C.UTF-8"
+
+RUN apt-get update && apt-get -y install libcurl4-openssl-dev libsqlite3-dev wget gcc unzip make git
+
+WORKDIR /tmp/build/su-exec
+RUN git clone https://github.com/ncopa/su-exec source && cd source && make
+
+WORKDIR /tmp/build/onedrive
+RUN wget http://downloads.dlang.org/releases/2.x/2.075.1/dmd_2.075.1-0_amd64.deb -O dmd.deb && dpkg -i dmd.deb \
+  && git clone https://github.com/skilion/onedrive source && cd source && make
 
 FROM debian
+ARG DEBIAN_FRONTEND="noninteractive"
+ENV TERM="xterm" LANG="C.UTF-8" LC_ALL="C.UTF-8"
 
-COPY --from=builder /tmp/su-exec/su-exec /tmp/onedrive/onedrive /usr/local/bin/
-COPY --from=builder /tmp/onedrive/onedrive.service /usr/lib/systemd/user/
+COPY --from=builder /tmp/build/su-exec/source/su-exec /tmp/build/onedrive/source/onedrive /usr/local/bin/
+COPY --from=builder /tmp/build/onedrive/source/onedrive.service /usr/lib/systemd/user/
 
 ENV ONEDRIVE_UID=1000 ONEDRIVE_GID=1000
 
