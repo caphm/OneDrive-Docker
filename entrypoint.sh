@@ -30,4 +30,4 @@ if [ ! -z "${ONEDRIVE_GID}" ]; then
 fi
 
 # Start OndeDrive Free Client as designated user
-exec gosu onedrive "$0" "$@"
+exec su-exec onedrive "$@"
