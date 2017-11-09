@@ -1,14 +1,5 @@
 #!/bin/bash
 
-quote() {
-  for arg
-  do
-    var=$(printf "%sx" "$arg" | sed -e "s/'/'\\\\''/")
-    var=${var%x}
-    printf "'%s' " "$var"
-  done
-}
-
 # Setup user/group ids
 if [ ! -z "${ONEDRIVE_UID}" ]; then
   if [ ! "$(id -u onedrive)" -eq "${ONEDRIVE_UID}" ]; then
@@ -29,9 +20,6 @@ if [ ! -z "${ONEDRIVE_UID}" ]; then
       usermod -d /config onedrive
       rm -Rf /tmp/temphome
     fi
-    echo Changed UID of user onedrive
-  else
-  	echo UID is already matching
   fi
 fi
 
@@ -41,7 +29,5 @@ if [ ! -z "${ONEDRIVE_GID}" ]; then
   fi
 fi
 
-echo Starting client with "$(quote "$@")"
-
 # Start OndeDrive Free Client as designated user
-exec su - onedrive -c "$(quote "$@")"
+exec gosu onedrive "$0" "$@"
