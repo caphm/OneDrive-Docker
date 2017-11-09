@@ -6,6 +6,7 @@ RUN set -ex; \
 		ca-certificates \
 		curl \
 		gnupg \
+		dirmngr \
 	'; \
 	apt-get update; \
 	apt-get install -y --no-install-recommends $fetchDeps; \
