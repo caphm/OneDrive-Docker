@@ -29,6 +29,9 @@ if [ ! -z "${ONEDRIVE_UID}" ]; then
       usermod -d /config onedrive
       rm -Rf /tmp/temphome
     fi
+    echo Changed UID of user onedrive
+  else
+  	echo UID is already matching
   fi
 fi
 
@@ -37,6 +40,8 @@ if [ ! -z "${ONEDRIVE_GID}" ]; then
     groupmod -o -g "${ONEDRIVE_GID}" onedrive
   fi
 fi
+
+echo Starting client with "$(quote "$@")"
 
 # Start OndeDrive Free Client as designated user
 exec su - onedrive -c "$(quote "$@")"
